@@ -9,7 +9,13 @@
               branches:
                 only:
                   - main
-
+        - deploy:
+            filters:
+              branches:
+                only:
+                  - main
+            requires:
+              - build
   jobs:
     build:
       working_directory: ~/SimpleApplication
@@ -29,4 +35,10 @@
             key: dependency-cache-{{ checksum "package-lock.json" }}
             paths:
               - ./node_modules
-
+  deploy:
+    docker:
+      - image: circleci/node:10.16.3
+    steps:
+      - run: 
+          name: deploy-application
+          command: ssh -o StrictHostKeyChecking=no $EC2_DevOpsLab@$EC2_PUBLIC_DNS "rm -rf SimpleAplication/;git clone https://github.com/JakubSieron/SimpleApplication.git; source SimpleApplication/deploy.sh"
