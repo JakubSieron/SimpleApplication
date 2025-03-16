@@ -10,28 +10,32 @@ jobs:
       - run:
           name: update-npm
           command: sudo npm install -g npm@5
-      - restore_cache: 
+      - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
-      - run:
+      - run: 
           name: install-npm
           command: npm install
-      - save_cache: 
+      - save_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
 
   deploy:
     docker:
-      - image: circle/node:10.16.3
+      - image: circleci/node:10.16.3
     steps:
-      - add_shsh_keys:
+      - add_ssh_keys:
           fingerprints:
-            - "<your_ssh_key_fingerprint_here>"
-      - run:
+            - "<your_ssh_key_fingerprint_here>" # optional if SSH keys set in CircleCI
+      - run: 
           name: deploy-application
-          command: 
-            ssh -o StrictHostKeyChange=no $EC2_DevOpsLab@$EC@_PUBLIC_DNS "rm -rf SimpleApplication; git clone http://github.com/JakubSieron?SimpleApplication.git; source SimpleApplication/deploy.sh"
-    
+          command: |
+            ssh -o StrictHostKeyChecking=no $EC2_DevOpsLab@$EC2_PUBLIC_DNS "
+              rm -rf SimpleApplication;
+              git clone https://github.com/JakubSieron/SimpleApplication.git;
+              source SimpleApplication/deploy.sh
+            "
+
 workflows:
   build-and-deploy:
     jobs:
@@ -39,13 +43,11 @@ workflows:
           filters:
             branches:
               only:
-                -main
-      - deploy: 
+                - main
+      - deploy:
           requires:
             - build
           filters:
             branches:
               only:
-                -main      
-
-  
+                - main
