@@ -8,7 +8,7 @@ pm2 stop si_app
 cd SimpleApplication/
 
 npm install
-echo $privatekey > privatekey.pem
-echo $server > server.crt
+echo $PRIVATE_KEY > privatekey.pem
+echo $SERVER > server.crt
 
 pm2 start ./bin/www --name si_app
